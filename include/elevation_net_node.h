@@ -24,14 +24,15 @@
 #include "ai_msgs/msg/capture_targets.hpp"
 #include "ai_msgs/msg/perception_targets.hpp"
 #include "dnn_node/dnn_node.h"
-#include "include/elevation_net_output_parser.h"
-#include "include/image_utils.h"
 #include "sensor_msgs/msg/image.hpp"
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <sensor_msgs/point_cloud2_iterator.hpp>
 #ifdef SHARED_MEM_ENABLED
 #include "hbm_img_msgs/msg/hbm_msg1080_p.hpp"
 #endif
+
+#include "include/elevation_net_output_parser.h"
+#include "include/image_utils.h"
 
 #ifndef INCLUDE_ELEVATIONNET_NODE_H_
 #define INCLUDE_ELEVATIONNET_NODE_H_
@@ -45,7 +46,6 @@ using hobot::dnn_node::ModelTaskType;
 using hobot::dnn_node::TaskId;
 
 using hobot::dnn_node::DNNInput;
-using hobot::dnn_node::DNNResult;
 using hobot::dnn_node::NV12PyramidInput;
 
 struct ElevationNetOutput : public DnnNodeOutput {
@@ -63,7 +63,6 @@ class ElevationNetNode : public DnnNode {
 
  protected:
   int SetNodePara() override;
-  int SetOutputParser() override;
   int PostProcess(const std::shared_ptr<DnnNodeOutput> &outputs) override;
 
  private:
@@ -119,8 +118,9 @@ class ElevationNetNode : public DnnNode {
   std::string pointcloud_pub_topic_name_ = "/elevation_net/points";
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr cloud_pub_ =
       nullptr;
-  int PubPointcCloud(ElevationNetResult *det_result, uint32_t src_img_width,
-                     uint32_t src_img_height);
+  int PubPointcCloud(std::shared_ptr<ElevationNetResult> det_result,
+                      uint32_t src_img_width,
+                      uint32_t src_img_height);
   int image_shift_ = 24;
   std::vector<std::vector<float>> kCalibMatrix_{
       {746.2463540682126, 0.0, 971.6589299894808, 0.0},

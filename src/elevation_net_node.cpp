@@ -14,23 +14,19 @@
 
 #include "include/elevation_net_node.h"
 
-#include <unistd.h>
-
 #include <fstream>
 #include <memory>
 #include <string>
+#include <unistd.h>
 #include <vector>
 
 #include "dnn_node/dnn_node.h"
-#include "include/image_utils.h"
 #include "rclcpp/rclcpp.hpp"
 #ifdef CV_BRIDGE_PKG_ENABLED
 #include <cv_bridge/cv_bridge.h>
 #endif
 #include "include/elevation_net_output_parser.h"
-
-using hobot::easy_dnn::OutputDescription;
-using hobot::easy_dnn::OutputParser;
+#include "include/image_utils.h"
 
 ElevationNetNode::ElevationNetNode(const std::string &node_name,
                                    const NodeOptions &options)
@@ -126,30 +122,10 @@ int ElevationNetNode::SetNodePara() {
   return 0;
 }
 
-int ElevationNetNode::SetOutputParser() {
-  // set output parser
-  auto model_manage = GetModel();
-  if (!model_manage || !dnn_node_para_ptr_) {
-    RCLCPP_ERROR(rclcpp::get_logger("elevation_net_node"), "Invalid model");
-    return -1;
-  }
-
-  if (model_manage->GetOutputCount() < model_output_count_) {
-    RCLCPP_ERROR(rclcpp::get_logger("elevation_net_node"),
-                 "Error! Model %s output count is %d, unmatch with count %d",
-                 dnn_node_para_ptr_->model_name.c_str(),
-                 model_manage->GetOutputCount(), model_output_count_);
-    return -1;
-  }
-
-  std::shared_ptr<OutputParser> elevation_out_parser =
-      std::make_shared<ElevationNetOutputParser>();
-  model_manage->SetOutputParser(elevation_output_index_, elevation_out_parser);
-  return 0;
-}
-
 int ElevationNetNode::PostProcess(
     const std::shared_ptr<DnnNodeOutput> &node_output) {
+
+  // 1. 记录后处理开始处理时间
   struct timespec time_start = {0, 0};
   clock_gettime(CLOCK_REALTIME, &time_start);
   ai_msgs::msg::Perf perf;
@@ -171,14 +147,18 @@ int ElevationNetNode::PostProcess(
                 ss.str().c_str());
   }
 
-  const auto &outputs = node_output->outputs;
-  RCLCPP_INFO(rclcpp::get_logger("elevation_net_node"), "outputs size: %d",
-              outputs.size());
-  if (outputs.empty() ||
-      static_cast<int32_t>(outputs.size()) < model_output_count_) {
-    RCLCPP_ERROR(rclcpp::get_logger("elevation_net_node"), "Invalid outputs");
-    return -1;
-  }
+  // 2. 进行模型后处理解析
+  std::shared_ptr<ElevationNetOutputParser> elevation_out_parser =
+      std::make_shared<ElevationNetOutputParser>();
+
+  std::shared_ptr<ElevationNetResult> det_result = std::make_shared<ElevationNetResult>();
+
+  elevation_out_parser->Parse(det_result, elevation_output->output_tensors[elevation_output_index_]);
+
+  RCLCPP_INFO(rclcpp::get_logger("elevation_net_node"), "Output result depth size = %d, height size = %d",
+              det_result->depth_result.values.size(), det_result->height_result.values.size());
+  
+  // 3. 发布模型推理结果
   int smart_fps = 0;
   {
     auto tp_now = std::chrono::system_clock::now();
@@ -196,14 +176,19 @@ int ElevationNetNode::PostProcess(
     }
   }
 
-  auto *det_result = dynamic_cast<ElevationNetResult *>(
-      outputs[elevation_output_index_].get());
   if (!det_result) {
     RCLCPP_INFO(rclcpp::get_logger("elevation_net_node"), "invalid cast");
   } else {
     PubPointcCloud(det_result, elevation_output->src_img_width,
                    elevation_output->src_img_height);
   }
+
+  // 4. 打印前10个推理结果
+  for (int i = 0; i < 10; i++) {
+    RCLCPP_INFO(rclcpp::get_logger("elevation_net_node"), "Output result depth[%d] = %f, height[%d] = %f",
+            i, det_result->depth_result.values[i], i, det_result->height_result.values[i]);
+  }
+
   return 0;
 }
 
@@ -223,7 +208,7 @@ int ElevationNetNode::PredictByImage(const std::string image) {
 
   // 1. 将图片处理成模型输入数据类型DNNInput
   // 使用图片生成pym，NV12PyramidInput为DNNInput的子类
-  std::vector<std::shared_ptr<hobot::easy_dnn::NV12PyramidInput>> pyramid_list;
+  std::vector<std::shared_ptr<hobot::dnn_node::NV12PyramidInput>> pyramid_list;
   int ret = 0;
   // bgr img，支持将图片resize到模型输入size
   ret = image_utils_->GetNV12Pyramid(image, ImageType::BGR, model_input_height_,
@@ -274,7 +259,7 @@ void ElevationNetNode::RosImgProcess(
 
   // 1. 将图片处理成模型输入数据类型DNNInput
   // 使用图片生成pym，NV12PyramidInput为DNNInput的子类
-  std::vector<std::shared_ptr<hobot::easy_dnn::NV12PyramidInput>> pyramid_list;
+  std::vector<std::shared_ptr<hobot::dnn_node::NV12PyramidInput>> pyramid_list;
   int ret = 0;
   if ("rgb8" == img_msg->encoding) {
 #ifdef CV_BRIDGE_PKG_ENABLED
@@ -367,7 +352,7 @@ void ElevationNetNode::SharedMemImgProcess(
 
   // 1. 将图片处理成模型输入数据类型DNNInput
   // 使用图片生成pym，NV12PyramidInput为DNNInput的子类
-  std::vector<std::shared_ptr<hobot::easy_dnn::NV12PyramidInput>> pyramid_list;
+  std::vector<std::shared_ptr<hobot::dnn_node::NV12PyramidInput>> pyramid_list;
   int ret = 0;
   if ("nv12" ==
       std::string(reinterpret_cast<const char *>(img_msg->encoding.data()))) {
@@ -424,9 +409,9 @@ void ElevationNetNode::SharedMemImgProcess(
 }
 #endif
 
-int ElevationNetNode::PubPointcCloud(ElevationNetResult *det_result,
+int ElevationNetNode::PubPointcCloud(std::shared_ptr<ElevationNetResult> det_result,
                                      uint32_t src_img_width,
-                                     uint32_t src_img_height) {
+                                     uint32_t src_img_height) {                                      
   if (cloud_pub_ == nullptr) {
     this->get_parameter_or("pointcloud_pub_topic_name",
                            pointcloud_pub_topic_name_,

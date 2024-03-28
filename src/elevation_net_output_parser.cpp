@@ -63,8 +63,6 @@ int get_tensor_hwc_index(std::shared_ptr<DNNTensor> tensor, int *h_index,
 
 int32_t ElevationNetOutputParser::Parse(
     std::shared_ptr<ElevationNetResult> &output,
-    std::vector<std::shared_ptr<InputDescription>> &input_descriptions,
-    std::shared_ptr<OutputDescription> &output_description,
     std::shared_ptr<DNNTensor> &output_tensor) {
   static int print = 1;
   if (print) {
@@ -102,11 +100,9 @@ int32_t ElevationNetOutputParser::Parse(
   std::shared_ptr<ElevationNetResult> result;
   if (!output) {
     result = std::make_shared<ElevationNetResult>();
-    result->Reset();
     output = result;
   } else {
     result = std::dynamic_pointer_cast<ElevationNetResult>(output);
-    result->Reset();
   }
 
   if (!output_tensor) {
@@ -281,12 +277,12 @@ void ElevationNetOutputParser::GetFrameOutPut_NEON(uint32_t shift,
       float32x4_t height_neon = vmulq_f32(gamma_neon, depth_neon);
       vst1q_f32(static_cast<float *>(depth_ptr) + 4 * w, depth_neon);
       vst1q_f32(static_cast<float *>(height_ptr) + 4 * w, height_neon);
-      for (int i = 0; i < 4; i++) {
-        RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "depth: %f",
-                    *(reinterpret_cast<float *>(depth_ptr) + i + 4 * w));
-        RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "height: %f",
-                    *(reinterpret_cast<float *>(height_ptr) + i + 4 * w));
-      }
+      // for (int i = 0; i < 4; i++) {
+      //   RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "depth: %f",
+      //               *(reinterpret_cast<float *>(depth_ptr) + i + 4 * w));
+      //   RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "height: %f",
+      //               *(reinterpret_cast<float *>(height_ptr) + i + 4 * w));
+      // }
     }
   }
 }
@@ -318,10 +314,10 @@ void ElevationNetOutputParser::GetFrameOutPut(uint32_t shift,
       if (*depth > 2) *depth = 2;
       if (*height > 2) *height = 2;
       //        out << "gamma: " << gamma << std::endl;
-      RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "depth: %f",
-                    *depth);
-      RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "height: %f",
-                    *height);
+      // RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "depth: %f",
+      //               *depth);
+      // RCLCPP_INFO(rclcpp::get_logger("elevation_net_parser"), "height: %f",
+      //               *height);
     }
   }
 }

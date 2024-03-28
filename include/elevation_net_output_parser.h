@@ -21,26 +21,11 @@
 #include <vector>
 
 #include "dnn/hb_dnn_ext.h"
-#include "easy_dnn/data_structure.h"
-#include "easy_dnn/description.h"
-#include "easy_dnn/model.h"
-#include "easy_dnn/output_parser.h"
 
-using hobot::easy_dnn::DNNResult;
-using hobot::easy_dnn::DNNTensor;
-using hobot::easy_dnn::InputDescription;
-using hobot::easy_dnn::Model;
-using hobot::easy_dnn::MultiBranchOutputParser;
-using hobot::easy_dnn::OutputDescription;
-using hobot::easy_dnn::OutputParser;
-using hobot::easy_dnn::SingleBranchOutputParser;
+#include "dnn_node/dnn_node.h"
 
-class ElevationNetOutputDescription : public OutputDescription {
- public:
-  ElevationNetOutputDescription(Model *mode, int index, std::string type = "")
-      : OutputDescription(mode, index, type) {}
-  int op_type;
-};
+using hobot::dnn_node::DNNTensor;
+using hobot::dnn_node::Model;
 
 /**
  * \~Chinese @brief 单精度浮点数组，可用于存储特征值、质量结果等
@@ -51,21 +36,18 @@ struct FloatArray {
   float score = 0.0;
 };
 
-class ElevationNetResult : public DNNResult {
+class ElevationNetResult {
  public:
   FloatArray depth_result;
   FloatArray height_result;
 };
 
-class ElevationNetOutputParser : public SingleBranchOutputParser<ElevationNetResult> {
+class ElevationNetOutputParser {
  public:
   int32_t Parse(
       std::shared_ptr<ElevationNetResult> &output,
-      std::vector<std::shared_ptr<InputDescription>> &input_descriptions,
-      std::shared_ptr<OutputDescription> &output_description,
       std::shared_ptr<DNNTensor> &output_tensor);
 
- private:
   int32_t PostProcess(std::shared_ptr<DNNTensor> &output_tensor,
                       std::shared_ptr<ElevationNetResult> &det_result);
 
