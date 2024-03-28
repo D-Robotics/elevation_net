@@ -19,10 +19,8 @@
 #include <string>
 #include <vector>
 
-#include "easy_dnn/data_structure.h"
-#include "easy_dnn/model.h"
-#include "easy_dnn/model_manager.h"
-#include "easy_dnn/task_manager.h"
+#include "dnn_node/dnn_node.h"
+
 #include "opencv2/core/mat.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
@@ -33,14 +31,10 @@
     return;                                            \
   }
 
-using hobot::easy_dnn::DNNResult;
-using hobot::easy_dnn::DNNTensor;
-using hobot::easy_dnn::Model;
-using hobot::easy_dnn::ModelInferTask;
-using hobot::easy_dnn::ModelManager;
-using hobot::easy_dnn::ModelRoiInferTask;
-using hobot::easy_dnn::NV12PyramidInput;
-using hobot::easy_dnn::TaskManager;
+using hobot::dnn_node::DNNTensor;
+using hobot::dnn_node::Model;
+using hobot::dnn_node::ModelInferTask;
+using hobot::dnn_node::NV12PyramidInput;
 
 #define M_PI_F 3.141592653f
 
