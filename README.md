@@ -59,6 +59,13 @@ is_dense: True // No invalid points
 
 Support compiling on X3 Ubuntu system and using docker cross-compilation on PC.
 
+## Development Environment
+
+- Programming Language: C/C++
+- Development Platform: X3/X5/X86
+- System Version: Ubuntu 20.04/22.04
+- Compilation Toolchain: Linux GCC 9.3.0 / Linaro GCC 11.4.0
+
 #### Compilation Options
 
 1. CV_BRIDGE_PKG
