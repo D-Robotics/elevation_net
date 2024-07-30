@@ -4,7 +4,7 @@
   <name>elevation_net</name>
   <version>2.2.0</version>
   <description>TogetheROS elevation net</description>
-  <maintainer email="xue.liang@horizon.ai">xue.liang</maintainer>
+  <maintainer email="xue.liang@d-robotics.cc">xue.liang</maintainer>
   <license>Apache License 2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

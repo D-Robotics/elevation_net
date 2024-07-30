@@ -2,7 +2,7 @@
 
 # 功能介绍
 
-elevation_net package是使用hobot_dnn package开发的高程网络检测算法示例，在地平线X3开发板上使用高程网络模型和室内数据利用BPU处理器进行模型推理。
+elevation_net package是使用hobot_dnn package开发的高程网络检测算法示例，在RDK X3开发板上使用高程网络模型和室内数据利用BPU处理器进行模型推理。
 package可以订阅sensors/msg/Image(encoding必须为“nv12”)类型的话题，检测出Image基于像素的深度和高度信息，同时package将深度和高度信息进行处理，发布为PointCloud2类型的3维点云话题。此package默认读取本地图片进行检测的方式，将AI推理得到的数据信息发布出去。
 
 算法支持的室内环境检测信息如下：
@@ -86,7 +86,7 @@ rosdep update
 rosdep install -i --from-path . --rosdistro foxy -y
 ```
 
-dnn_node是在地平线X3开发板上利用BPU处理器进行模型推理的pkg，定义在hobot_dnn中。
+dnn_node是在RDK X3开发板上利用BPU处理器进行模型推理的pkg，定义在hobot_dnn中。
 
 hbm_img_msgs为自定义的图片消息格式，用于shared mem场景下的图片传输，hbm_img_msgs pkg定义在hobot_msgs中，因此如果使用shared mem进行图片传输，需要下载hobot_msgs。此package示例代码默认使用读取本地图片的方式进行推理，用户可根据需要自行修改。
 
@@ -183,7 +183,7 @@ ai_msgs为自定义的消息格式，用于算法模型推理后，发布推理�
 
 ## 运行
 
-编译成功后，将生成的install路径拷贝到地平线X3开发板上（如果是在X3上编译，忽略拷贝步骤），并执行如下命令运行：
+编译成功后，将生成的install路径拷贝到RDK X3开发板上（如果是在X3上编译，忽略拷贝步骤），并执行如下命令运行：
 
 ### **X3 Ubuntu**
 

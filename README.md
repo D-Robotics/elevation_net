@@ -2,7 +2,7 @@ English| [简体中文](./README_cn.md)
 
 # Function Introduction
 
-The elevation_net package is an elevation network detection algorithm example developed using the hobot_dnn package. It utilizes elevation network models and indoor data on the Horizon X3 development board for model inference using the BPU processor.
+The elevation_net package is an elevation network detection algorithm example developed using the hobot_dnn package. It utilizes elevation network models and indoor data on the RDK X3 development board for model inference using the BPU processor.
 This package can subscribe to topics of type sensors/msg/Image (encoding must be "nv12"). It detects the pixel-based depth and height information of the image, processes the depth and height information, and publishes it as a 3D point cloud topic of type PointCloud2. By default, this package reads local images for detection and publishes the data obtained from AI inference.
 
 The supported indoor environment detection information by the algorithm is as follows:
@@ -144,7 +144,7 @@ Support compiling on X3 Ubuntu system and using docker cross-compilation on PC.
 
 ## Execution
 
-After successful compilation, copy the generated install directory to the Horizon X3 development board (if compiling on X3, ignore the copy step), and run the following command:
+After successful compilation, copy the generated install directory to the RDK X3 development board (if compiling on X3, ignore the copy step), and run the following command:
 
 ### **X3 Ubuntu**
 
