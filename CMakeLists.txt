@@ -83,11 +83,13 @@ endif()
 message("SYS_ROOT is " ${SYS_ROOT})
 include_directories(
   ${SYS_ROOT}/usr/include/
+  ${SYS_ROOT}/usr/hobot/include/
   ${SYS_ROOT}/usr/include/opencv/
 )
 
 link_directories(
   ${SYS_ROOT}/usr/lib/hobot/
+  ${SYS_ROOT}/usr/hobot/lib/
   ${SYS_ROOT}/usr/lib/hobot/opencv
   ${SYS_ROOT}/usr/lib/hobot/hobotlog
   ${SYS_ROOT}/usr/lib/hbbpu/
