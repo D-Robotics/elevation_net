@@ -26,6 +26,7 @@
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/opencv.hpp"
+#include "opencv2/imgproc/types_c.h"
 
 int ImageUtils::Init() {
   model_input_width_ = 960;
